@@ -8,7 +8,7 @@ namespace BookShoppingCart.Models
     {
         public int Id { get; set; }
         [Required]
-        [MaxLength(40)]
+        [MaxLength(100)]
         public string? BookName { get; set; }
         [Required]
         [MaxLength(40)]
@@ -21,5 +21,7 @@ namespace BookShoppingCart.Models
         public Genre Genre { get; set; }
         public List<OrderDetail> OrderDetail { get; set; }
         public List<CartDetail> CartDetail { get; set; }
+        [NotMapped]
+        public string GenreName {  get; set; }
     }
 }
