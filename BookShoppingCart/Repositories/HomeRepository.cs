@@ -4,22 +4,27 @@ namespace BookShoppingCart.Repositories
 {
     public class HomeRepository: IHomeRepository
     {
-        private readonly ApplicationDbContext db;
+        private readonly ApplicationDbContext _db;
 
         public HomeRepository(ApplicationDbContext db)
         {
-            this.db = db;
+            _db = db;
+        }
+        public async Task<IEnumerable<Genre>> GetGenres()
+        {
+            return await _db.Genres.ToListAsync();
         }
         public async Task<IEnumerable<Book>> GetBooks(string sTerm = "", int genreId = 0)
         {
             sTerm = sTerm.ToLower();
-            IEnumerable<Book> books = await (from book in db.Books
-                         join genre in db.Genres
+            IEnumerable<Book> books = await (from book in _db.Books
+                         join genre in _db.Genres
                          on book.GenreId equals genre.Id
-                         where string.IsNullOrWhiteSpace(sTerm) || (book!= null && book.BookName.ToLower().StartsWith(sTerm)) || (genreId > 0 && genreId == book.GenreId)
+                         where (string.IsNullOrWhiteSpace(sTerm) || book.BookName.ToLower().StartsWith(sTerm)) && (genreId == 0 || genreId == book.GenreId)
                          select new Book
                          {
                              Id=book.Id,
+                             BookName = book.BookName,
                              Image=book.Image,
                              AuthorName=book.AuthorName,
                              GenreId = book.GenreId,
