@@ -90,19 +90,19 @@ namespace BookShoppingCart.Repositories
             int cartItemCount = await GetCartItemCount(userId);
             return cartItemCount;
         }
-        public async Task<IEnumerable<ShoppingCart>> GetUserCart()
+        public async Task<ShoppingCart> GetUserCart()
         {
             string userId = GetUserId();
             if (string.IsNullOrEmpty(userId))
                 throw new Exception("Invalid UserId");
-            IEnumerable<ShoppingCart> shoppinCart = await _db.ShoopingCarts
+            ShoppingCart shoppinCart = await _db.ShoopingCarts
                 .Include(a => a.cartDetails)
                 .ThenInclude(a => a.Book)
                 .ThenInclude(a => a.Genre)
-                .Where(a => a.UserId == userId).ToListAsync();
+                .Where(a => a.UserId == userId).FirstOrDefaultAsync();
             return shoppinCart;
         }
-        private async Task<ShoppingCart> GetCart(string userId) {
+        public async Task<ShoppingCart> GetCart(string userId) {
             ShoppingCart cart = await _db.ShoopingCarts.FirstOrDefaultAsync(x => x.UserId == userId);
             return cart;
         }
