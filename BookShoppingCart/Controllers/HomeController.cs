@@ -31,6 +31,10 @@ namespace BookShoppingCart.Controllers
             return View(bookModel);
         }
 
+        public bool IsUserLoggedIn()
+        {
+            return _homeRepository.IsUserLoggedIn();
+        }
         public IActionResult Privacy()
         {
             return View();

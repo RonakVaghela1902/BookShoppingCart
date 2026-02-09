@@ -1,14 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BookShoppingCart.Repositories
 {
     public class HomeRepository: IHomeRepository
     {
         private readonly ApplicationDbContext _db;
-
-        public HomeRepository(ApplicationDbContext db)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public HomeRepository(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<IEnumerable<Genre>> GetGenres()
         {
@@ -32,6 +36,13 @@ namespace BookShoppingCart.Repositories
                              GenreName = genre.GenreName
                          }).ToListAsync();
             return books;
+        }
+        public bool IsUserLoggedIn()
+        {
+            ClaimsPrincipal User = _httpContextAccessor.HttpContext.User;
+            if (User.Identity.IsAuthenticated)
+                return true;
+            return false;
         }
     }
 }

@@ -46,6 +46,30 @@
         @RenderBody()
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+        loadCartCount();
+        async function loadCartCount(bookId) {
+            let userResponse = await fetch(`/Home/IsUserLoggedIn`);
+            if (userResponse.status == 200) {
+                let result = await userResponse.json();
+                if (result){
+                    try {
+                        let response = await fetch(`/Cart/GetTotalItemInCart?bookId=${bookId}`);
+                        if (response.status == 200) {
+                            let result = await response.json();
+                            let cartCountEl = document.getElementById("cartCount");
+                            cartCountEl.innerHTML = result;
+                        }
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                } else {
+                    window.location.href = "Identity/Account/Login";
+                }
+            }
+        }
+    </script>
 </body>
 </html>
 

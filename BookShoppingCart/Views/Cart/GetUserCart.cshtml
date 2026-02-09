@@ -1,0 +1,55 @@
+﻿@model ShoppingCart
+@{
+    ViewData["Title"] = "GetUserCart";
+}
+
+<div style="width:90%;margin:auto" class="mt-2">
+    @if (Model != null && Model.cartDetails != null && Model.cartDetails.Count > 0)
+    {
+        <h3>My Cart</h3>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Image</th>
+                    <th>Genre</th>
+                    <th>Unit Price (INR)</th>
+                    <th>Total Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(CartDetail item in Model.cartDetails)
+                {
+                    <tr>
+                        <td>@item.Book.BookName</td>
+                        <td>
+                            @{
+                                string fileName = !string.IsNullOrEmpty(item.Book.Image) ? @item.Book.Image: "NoImage.jpg";
+                            }
+                            <img src="/images/@fileName" style="width:80px;height:100px" />
+                        </td>
+                        <td>@item.Book.Genre.GenreName</td>
+                        <td>@item.Book.Price X @item.Quantity</td>
+                        <td>@(item.Quantity*item.Book.Price)</td>
+                        <td>
+                            <a class="btn btn-info" asp-controller="Cart" asp-action="AddItem" asp-route-bookId="@item.Book.Id" asp-route-redirect="1">+</a>
+                            <a class="btn btn-info" asp-controller="Cart" asp-action="RemoveItem" asp-route-bookId="@item.Book.Id">-</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="my-2">
+            <h5>
+                <b>Total: Rs.</b>
+                @(Model.cartDetails.Select(item => item.Book.Price*item.Quantity).Sum())
+            </h5>
+        </div>
+    }
+    else
+    {
+        <h5>Cart Is Empty</h5>
+    }
+</div>
