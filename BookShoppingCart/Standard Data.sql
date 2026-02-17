@@ -60,3 +60,19 @@ WHERE NOT EXISTS (
       AND BK.AuthorName = B.AuthorName
       AND BK.GenreId = G.Id
 );
+
+INSERT INTO OrderStatuses (StatusId, StatusName)
+SELECT v.StatusId, v.StatusName
+FROM (VALUES
+    (1, 'Pending'),
+	(2, 'Shipped'),
+	(3, 'Delivered'),
+	(4, 'Cancelled'),
+	(5, 'Returned'),
+	(6, 'Refund')
+) v(StatusId, StatusName)
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM OrderStatuses os 
+    WHERE os.StatusName = v.StatusName
+);

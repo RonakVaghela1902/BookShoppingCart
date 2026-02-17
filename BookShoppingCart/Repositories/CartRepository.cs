@@ -44,11 +44,13 @@ namespace BookShoppingCart.Repositories
                     }
                     else
                     {
+                        Book book = await _db.Books.FindAsync(bookId);
                         cartItem = new CartDetail()
                         {
                             BookId = bookId,
                             ShoppingCartId = cart.Id,
-                            Quantity = qty
+                            Quantity = qty,
+                            UnitPrice = book.Price
                         };
                         _db.CartDetails.Add(cartItem);
                     }
@@ -123,6 +125,53 @@ namespace BookShoppingCart.Repositories
             ClaimsPrincipal principal = _httpContextAccessor.HttpContext.User;
             string userId = _userManager.GetUserId(principal);
             return userId;
+        }
+        public async Task<bool> DoCheckout()
+        {
+            using IDbContextTransaction transcation = _db.Database.BeginTransaction();
+            try
+            {
+                //mov data from cartDetail to order and orderdetail then remove cart detail
+                string userId = GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                    throw new Exception("User is not logged-in");
+                ShoppingCart cart = await GetCart(userId);
+                if (cart is null)
+                    throw new Exception("Invalid Cart");
+                List<CartDetail> cartDetail = _db.CartDetails
+                                            .Where(a => a.ShoppingCartId == cart.Id).ToList();
+                if (cartDetail.Count == 0)
+                    throw new Exception("Cart is empty");
+
+                var order = new Order()
+                {
+                    UserId = userId,
+                    CreateDate = DateTime.UtcNow,
+                    OrderStatusId = 1, //Pending
+                };
+                _db.Orders.Add(order);
+                _db.SaveChanges();
+                foreach (CartDetail item in cartDetail)
+                {
+                    OrderDetail orderDetail = new OrderDetail()
+                    {
+                        BookId = item.BookId,
+                        OrderId = order.Id,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    };
+                    _db.OrderDetails.Add(orderDetail);
+                }
+                _db.SaveChanges();
+                _db.CartDetails.RemoveRange(cartDetail);
+                _db.SaveChanges();
+                transcation.Commit();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

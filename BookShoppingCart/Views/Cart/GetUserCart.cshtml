@@ -47,6 +47,9 @@
                 @(Model.cartDetails.Select(item => item.Book.Price*item.Quantity).Sum())
             </h5>
         </div>
+        <div class="my-2">
+            <a class="btn btn-primary" asp-controller="Cart" asp-action="DoCheckout">Checkout</a>
+        </div>
     }
     else
     {

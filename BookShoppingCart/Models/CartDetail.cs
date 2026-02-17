@@ -13,6 +13,8 @@ namespace BookShoppingCart.Models
         public int BookId { get; set; }
         public Book Book { get; set; }
         [Required]
+        public decimal UnitPrice { get; set; }
+        [Required]
         public int Quantity { get; set; }
         public ShoppingCart ShoppingCart { get; set; }
     }
