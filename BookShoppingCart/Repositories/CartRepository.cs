@@ -127,7 +127,7 @@ namespace BookShoppingCart.Repositories
             string userId = _userManager.GetUserId(principal);
             return userId;
         }
-        public async Task<bool> DoCheckout(CheckoutModel checkoutModel)
+        public async Task<bool> Checkout(CheckoutModel checkoutModel)
         {
             using IDbContextTransaction transcation = _db.Database.BeginTransaction();
             try

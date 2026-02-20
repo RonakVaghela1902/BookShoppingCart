@@ -33,16 +33,16 @@ namespace BookShoppingCart.Controllers
             int cartItemCount = await _cartRepository.GetCartItemCount();
             return Ok(cartItemCount);
         }
-        public IActionResult DoCheckout()
+        public IActionResult Checkout()
         {
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> DoCheckout(CheckoutModel checkoutModel)
+        public async Task<IActionResult> Checkout(CheckoutModel checkoutModel)
         {
             if (!ModelState.IsValid)
                 return View(checkoutModel);
-            bool isCheckedOut = await _cartRepository.DoCheckout(checkoutModel);
+            bool isCheckedOut = await _cartRepository.Checkout(checkoutModel);
             if (!isCheckedOut)
                 return RedirectToAction(nameof(OrderFailure));
             return RedirectToAction(nameof(OrderSuccess));

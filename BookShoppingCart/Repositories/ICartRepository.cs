@@ -11,6 +11,6 @@ namespace BookShoppingCart.Repositories
         Task<ShoppingCart> GetUserCart();
         Task<ShoppingCart> GetCart(string userId);
         Task<int> GetCartItemCount(string userId = "");
-        Task<bool> DoCheckout(CheckoutModel checkoutModel);
+        Task<bool> Checkout(CheckoutModel checkoutModel);
     }
 }
