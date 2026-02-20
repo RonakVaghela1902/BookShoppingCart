@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using BookShoppingCart.Constants;
 
 namespace BookShoppingCart.Data
 {

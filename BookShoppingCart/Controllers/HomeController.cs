@@ -1,7 +1,4 @@
-using BookShoppingCart.Models;
-using BookShoppingCart.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace BookShoppingCart.Controllers
