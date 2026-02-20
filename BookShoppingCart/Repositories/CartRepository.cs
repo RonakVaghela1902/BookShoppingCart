@@ -25,7 +25,7 @@ namespace BookShoppingCart.Repositories
                 try
                 {
                     if (string.IsNullOrEmpty(userId))
-                        throw new Exception("User is not logg-in");
+                        throw new UnauthorizedAccessException("User is not logg-in");
                     ShoppingCart cart = await GetCart(userId);
                     if (cart is null)
                     {
@@ -70,15 +70,15 @@ namespace BookShoppingCart.Repositories
             try
             {
                 if (string.IsNullOrEmpty(userId))
-                    throw new Exception("User is not logg-in");
+                    throw new UnauthorizedAccessException("User is not logg-in");
 
                 ShoppingCart cart = await GetCart(userId);
                 if (cart is null)
-                    throw new Exception("Cart is empty");
+                    throw new InvalidOperationException("Cart is empty");
 
                 CartDetail cartItem = _db.CartDetails.FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.BookId == bookId);
                 if (cartItem is null)
-                    throw new Exception("No items in the cart");
+                    throw new InvalidOperationException("No items in the cart");
                 else if (cartItem.Quantity == 1)
                     _db.CartDetails.Remove(cartItem);
                 else
@@ -93,15 +93,19 @@ namespace BookShoppingCart.Repositories
         }
         public async Task<ShoppingCart> GetUserCart()
         {
-            string userId = GetUserId();
-            if (string.IsNullOrEmpty(userId))
-                throw new Exception("Invalid UserId");
-            ShoppingCart shoppinCart = await _db.ShoopingCarts
-                .Include(a => a.cartDetails)
-                .ThenInclude(a => a.Book)
-                .ThenInclude(a => a.Genre)
-                .Where(a => a.UserId == userId).FirstOrDefaultAsync();
-            return shoppinCart;
+            var userId = GetUserId();
+            if (userId == null)
+                throw new InvalidOperationException("Invalid userid");
+            var shoppingCart = await _db.ShoopingCarts
+                                  .Include(a => a.cartDetails)
+                                  .ThenInclude(a => a.Book)
+                                  .ThenInclude(a => a.Stock)
+                                  .Include(a => a.cartDetails)
+                                  .ThenInclude(a => a.Book)
+                                  .ThenInclude(a => a.Genre)
+                                  .Where(a => a.UserId == userId).FirstOrDefaultAsync();
+            return shoppingCart;
+
         }
         public async Task<ShoppingCart> GetCart(string userId) {
             ShoppingCart cart = await _db.ShoopingCarts.FirstOrDefaultAsync(x => x.UserId == userId);
@@ -134,17 +138,17 @@ namespace BookShoppingCart.Repositories
                 //mov data from cartDetail to order and orderdetail then remove cart detail
                 string userId = GetUserId();
                 if (string.IsNullOrEmpty(userId))
-                    throw new Exception("User is not logged-in");
+                    throw new UnauthorizedAccessException("User is not logged-in");
                 ShoppingCart cart = await GetCart(userId);
                 if (cart is null)
-                    throw new Exception("Invalid Cart");
+                    throw new InvalidOperationException("Invalid Cart");
                 List<CartDetail> cartDetail = _db.CartDetails
                                             .Where(a => a.ShoppingCartId == cart.Id).ToList();
                 if (cartDetail.Count == 0)
-                    throw new Exception("Cart is empty");
+                    throw new InvalidOperationException("Cart is empty");
                 var pendingRecord = _db.OrderStatuses.FirstOrDefault(s => s.StatusName == "Pending");
                 if (pendingRecord is null)
-                    throw new Exception("Order Status does not have Pending Status");
+                    throw new InvalidOperationException("Order Status does not have Pending Status");
                 var order = new Order()
                 {
                     UserId = userId,
@@ -169,8 +173,24 @@ namespace BookShoppingCart.Repositories
                         UnitPrice = item.UnitPrice
                     };
                     _db.OrderDetails.Add(orderDetail);
+
+                    //Update Stock Here
+                    Stock stock = await _db.Stocks.FirstOrDefaultAsync(s=> s.BookId == item.BookId);
+                    if (stock == null)
+                    {
+                        throw new InvalidOperationException("Stock is null");
+                    }
+
+                    if (item.Quantity > stock.Quantity)
+                    {
+                        throw new InvalidOperationException($"Only {stock.Quantity} items(s) are available in the stock");
+                    }
+                    // decrease the number of quantity from the stock table
+                    stock.Quantity -= item.Quantity;
                 }
                 _db.SaveChanges();
+
+                //Removing Cart Details
                 _db.CartDetails.RemoveRange(cartDetail);
                 _db.SaveChanges();
                 transcation.Commit();

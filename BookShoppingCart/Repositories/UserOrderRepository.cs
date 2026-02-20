@@ -27,7 +27,7 @@ namespace BookShoppingCart.Repositories
             {
                 var userId = GetUserId();
                 if (string.IsNullOrEmpty(userId))
-                    throw new Exception("User is not logged-in");
+                    throw new UnauthorizedAccessException("User is not logged-in");
                 orders = orders.Where(a => a.UserId == userId);
                 return await orders.ToListAsync();
             }

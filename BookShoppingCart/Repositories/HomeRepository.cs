@@ -24,6 +24,10 @@ namespace BookShoppingCart.Repositories
             IEnumerable<Book> books = await (from book in _db.Books
                          join genre in _db.Genres
                          on book.GenreId equals genre.Id
+                         join stock in _db.Stocks
+                         on book.Id equals stock.BookId
+                         into book_stocks
+                         from bookWithStock in book_stocks.DefaultIfEmpty()
                          where (string.IsNullOrWhiteSpace(sTerm) || book.BookName.ToLower().StartsWith(sTerm)) && (genreId == 0 || genreId == book.GenreId)
                          select new Book
                          {
@@ -33,7 +37,8 @@ namespace BookShoppingCart.Repositories
                              AuthorName=book.AuthorName,
                              GenreId = book.GenreId,
                              Price = book.Price,
-                             GenreName = genre.GenreName
+                             GenreName = genre.GenreName,
+                             Quantity = bookWithStock==null ? 0 : bookWithStock.Quantity,
                          }).ToListAsync();
             return books;
         }

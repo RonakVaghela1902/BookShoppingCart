@@ -33,8 +33,17 @@
                         <td>@item.Book.Price X @item.Quantity</td>
                         <td>@(item.Quantity*item.Book.Price)</td>
                         <td>
-                            <a class="btn btn-info" asp-controller="Cart" asp-action="AddItem" asp-route-bookId="@item.Book.Id" asp-route-redirect="1">+</a>
-                            <a class="btn btn-info" asp-controller="Cart" asp-action="RemoveItem" asp-route-bookId="@item.Book.Id">-</a>
+                            @* Increase Quantity button should be invisible if not enough stock*@
+                            @if (item.Quantity < item.Book.Stock.Quantity)
+                            {
+                                <a class="btn btn-info" asp-controller="Cart" asp-action="AddItem" asp-route-bookId="@item.BookId" asp-route-redirect="1">+</a>
+                            }
+                            else
+                            {
+                                <span style="border: 1px solid;padding: 8px 8px;color: red;border-radius: 5px;margin-right:4px">Out of stock </span>
+                            }
+                            @* Decrement button *@
+                            <a class="btn btn-info" asp-controller="Cart" asp-action="RemoveItem" asp-route-bookId="@item.BookId">-</a>
                         </td>
                     </tr>
                 }

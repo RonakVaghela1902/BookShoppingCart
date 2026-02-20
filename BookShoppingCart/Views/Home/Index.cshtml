@@ -44,7 +44,15 @@
                 <h6 class="card-title"><b>Genre: </b>@book.GenreName</h6>
                 <h6 class="card-title"><b>Author: </b>@book.AuthorName</h6>
                 <h6 class="card-title"><b>Price: </b>@book.Price</h6>
-                <button type="button" onclick="add(@book.Id)" class="btn btn-primary">Add To Cart</button>
+                @* <h6 class="card-title"><b>Quantity: </b>@book.Quantity</h6> *@
+                @if (book.Quantity > 0)
+                {
+                    <button type="button" onclick="add(@book.Id)" class="btn btn-primary">Add To Cart</button>
+                }
+                else
+                {
+                    <span style="border: 1px solid;padding: 5px 8px;color: red;border-radius: 5px;">Out of stock</span>
+                }
             </div>
         </div>
     }
